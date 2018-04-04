@@ -5,8 +5,11 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="login_with_facebook">LOGIN WITH FACEBOOK</string>
-    <string name="login_with_google">LOGIN WITH GOOGLE</string>
+    <string name="login_with_facebook">SIGN IN WITH FACEBOOK</string>
+    <string name="login_with_google">SIGN IN WITH GOOGLE</string>
     <string name="login_description">Dog tacker with a dog in the beach</string>
     <string name="app_title"><![CDATA[Pet & Go]]></string>
+    <string name="signing_in_label">Signing in</string>
+    <string name="facebook_app_id">2010150639242622</string>
+    <string name="fb_login_protocol_scheme">fb2010150639242622</string>
 </resources>

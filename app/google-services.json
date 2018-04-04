@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "548892881161",
+    "firebase_url": "https://coral-airfoil-200016.firebaseio.com",
+    "project_id": "coral-airfoil-200016",
+    "storage_bucket": "coral-airfoil-200016.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548892881161:android:52a08c6e4f5101be",
+        "android_client_info": {
+          "package_name": "mx.iteso.petgo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "548892881161-ms8oj53gf0cg5ben0bsuf3l8dugrdo05.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "548892881161-dhhv1f4rci66mh39qqpkdsi22e86ldem.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mx.iteso.petgo",
+            "certificate_hash": "1815cb759ce41e3cf7f077c0fafa123e0ef4edee"
+          }
+        },
+        {
+          "client_id": "548892881161-7ala6qlvtvj3neb1f1kumkuepqtg6fv1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvK5vWhS70BA0l7MS6A2HrDAk0OytH46U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "548892881161-ms8oj53gf0cg5ben0bsuf3l8dugrdo05.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
