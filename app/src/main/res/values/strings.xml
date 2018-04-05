@@ -10,7 +10,16 @@
     <string name="facebook_app_id">2010150639242622</string>
     <string name="fb_login_protocol_scheme">fb2010150639242622</string>
     <!-- Drawer -->
+    <string name="navigation_drawer_user">User name</string>
+    <string name="navigation_drawer_raking">Raking</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_solicitud">Solicitudes</string>
+    <string name="navigation_drawer_pagos">Pagos</string>
+    <string name="navigation_drawer_pendientes">Pendientes</string>
+    <string name="navigation_drawer_ganancias">Ganancias</string>
+    <string name="navigation_drawer_stats">Stats</string>
+    <string name="title_activity_maps">Map</string>
+
 
 </resources>

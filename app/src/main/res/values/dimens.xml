@@ -9,5 +9,7 @@
     <dimen name="margin_spacing_buttons">5dp</dimen>
     <dimen name="padding_login">10dp</dimen>
     <dimen name="google_login">1</dimen>
-
+    <!-- -->
+    <dimen name="solicitud_item_name">16sp</dimen>
+    <dimen name="solicitud_item_other">12sp</dimen>
 </resources>
