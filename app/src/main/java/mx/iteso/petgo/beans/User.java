@@ -12,6 +12,15 @@ public class User implements Parcelable {
     private String provider;
     private String name;
     private String tokenId;
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getEmail() {
         return email;
@@ -45,6 +54,7 @@ public class User implements Parcelable {
         this.tokenId = tokenId;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -56,6 +66,7 @@ public class User implements Parcelable {
         dest.writeString(this.provider);
         dest.writeString(this.name);
         dest.writeString(this.tokenId);
+        dest.writeString(this.imageUrl);
     }
 
     public User() {
@@ -66,6 +77,7 @@ public class User implements Parcelable {
         this.provider = in.readString();
         this.name = in.readString();
         this.tokenId = in.readString();
+        this.imageUrl = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
