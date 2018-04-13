@@ -117,23 +117,26 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
     }
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
+        /**
+         * https://stackoverflow.com/questions/39249043/firebase-auth-get-additional-user-info-age-gender?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+         * */
         if (user != null) { // User authenticated
-            User loginUsser = new User();
-            loginUsser.setEmail(user.getEmail());
-            loginUsser.setName(user.getDisplayName());
-            loginUsser.setTokenId(user.getUid());
+            User loginUser = new User();
+            loginUser.setEmail(user.getEmail());
+            loginUser.setName(user.getDisplayName());
+            loginUser.setTokenId(user.getUid());
             String provider = null;
             if (user.getProviderData().size() > 1)
                 provider = user.getProviderData().get(1).getProviderId();
 
             if (provider.contains(FACEBOOK_PROVIDER)) {
-                loginUsser.setProvider(FACEBOOK_PROVIDER);
+                loginUser.setProvider(FACEBOOK_PROVIDER);
             } else if (provider.contains(GOOGLE_PROVIDER)){
-                loginUsser.setProvider(GOOGLE_PROVIDER);
+                loginUser.setProvider(GOOGLE_PROVIDER);
             }
 
-            Intent intent = new Intent(this, ActivityMain.class);
-            intent.putExtra(PARCELABLE_USER, loginUsser);
+            Intent intent = new Intent(this, ActivityBottomNav.class);
+            intent.putExtra(PARCELABLE_USER, loginUser);
             startActivity(intent);
             finish();
         }
