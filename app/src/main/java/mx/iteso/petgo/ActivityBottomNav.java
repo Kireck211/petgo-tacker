@@ -39,9 +39,9 @@ public class ActivityBottomNav extends ActivityBase {
                 case R.id.navigation_profile:
                     mTextMessage.setText(R.string.title_profile);
                     Fragment profile = new ProfileFragment();
-                    Bundle bundle = new Bundle();
+                    /*Bundle bundle = new Bundle();
                     bundle.putParcelable(PARCELABLE_USER,userProfile);
-                    profile.setArguments(bundle);
+                    profile.setArguments(bundle);*/
                     selectedFragment = profile;
                     break;
             }

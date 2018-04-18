@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="4dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp">
+
+        <ImageView
+            android:id="@+id/imageViewCliente"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="2dp"/>
+        <TextView
+            android:id="@+id/textViewClienteNombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre cliente de BD"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/imageViewCliente"/>
+        <TextView
+            android:id="@+id/textViewFechaPaseo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha de paseo BD"
+            android:textSize="10sp"
+            android:layout_below="@+id/textViewClienteNombre"
+            android:layout_toEndOf="@+id/imageViewCliente"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:id="@+id/textViewTiempoPaseo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tiempo de paseo BD"
+            android:textSize="10sp"
+            android:layout_below="@+id/textViewFechaPaseo"
+            android:layout_toEndOf="@+id/imageViewCliente"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:id="@+id/textViewClienteAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Domicilio cliente BD"
+            android:textSize="10sp"
+            android:layout_below="@+id/textViewTiempoPaseo"
+            android:layout_toEndOf="@+id/imageViewCliente"
+            android:layout_marginStart="8dp"/>
+
+        <ImageView
+            android:id="@+id/imageViewCancel"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_cancel" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

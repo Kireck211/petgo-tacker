@@ -53,7 +53,7 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
-                .build();
+                .build(); //734076330933-iljb8qg6cpgq6mv8amnngu841oqtof0q.apps.googleusercontent.com
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mBinding.btnGoogleActivityLogin.setOnClickListener(this);
