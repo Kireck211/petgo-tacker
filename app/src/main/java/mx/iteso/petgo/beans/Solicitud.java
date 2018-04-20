@@ -22,12 +22,7 @@ public class Solicitud implements Parcelable {
         this.walkTime = walkTime;
         this.clientAddress = clientAddress;
     }
-
-    public void invocarActivityCliente(Context context) {
-        Intent intent = new Intent(context, ActivityCliente.class);
-        context.startActivity(intent); /// ??????????
-    }
-
+    
     public int getmImageResource() {
         return mImageResource;
     }

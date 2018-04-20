@@ -1,5 +1,6 @@
 package mx.iteso.petgo.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.PrimitiveIterator;
 
+import mx.iteso.petgo.ActivityCliente;
 import mx.iteso.petgo.R;
 import mx.iteso.petgo.beans.Solicitud;
 import mx.iteso.petgo.recycler.RecyclerAdapter;
@@ -44,7 +46,11 @@ public class NotificationFragment extends Fragment {
         mAdapter.setOnItemClickListener(new RecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                solicitudes.get(position).invocarActivityCliente(getActivity());
+                solicitudes.get(position);
+                Intent intent = new Intent(getActivity(), ActivityCliente.class);
+                intent.putExtra("NAME",solicitudes.get(position).getClientName());
+                intent.putExtra("ADDRESS",solicitudes.get(position).getClientAddress());
+                startActivity(intent);
             }
 
             @Override

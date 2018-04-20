@@ -15,13 +15,21 @@
       },
       "oauth_client": [
         {
+          "client_id": "693851004309-es8h6h9762qg7qs5s0tkcdn6gkkq7q8s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mx.iteso.petgo",
+            "certificate_hash": "1815cb759ce41e3cf7f077c0fafa123e0ef4edee"
+          }
+        },
+        {
           "client_id": "693851004309-gnu7qphrjfpdm48nqch007vedp8rjfdg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAVFpK7saMPVI5-apNaSav_vfIlR32chlU"
+          "current_key": "AIzaSyBVou_SZBiYOWYUsRi4EMWF6_H8i5Mak8c"
         }
       ],
       "services": {
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "693851004309-gnu7qphrjfpdm48nqch007vedp8rjfdg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
