@@ -2,11 +2,12 @@ package mx.iteso.petgo.beans;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Solicitud implements Parcelable {
-    private int mImageResource;
+    private Uri mImageResource;
     private String clientName = "";
     private String walkDate = "";
     private String walkTime = "";
@@ -15,19 +16,19 @@ public class Solicitud implements Parcelable {
     public Solicitud() {
     }
 
-    public Solicitud(int mImageResource, String clientName, String walkDate, String walkTime, String clientAddress) {
-        this.mImageResource = mImageResource;
+    public Solicitud(String mImageResource, String clientName, String walkDate, String walkTime, String clientAddress) {
+        this.mImageResource = Uri.parse(mImageResource);
         this.clientName = clientName;
         this.walkDate = walkDate;
         this.walkTime = walkTime;
         this.clientAddress = clientAddress;
     }
     
-    public int getmImageResource() {
+    public Uri getmImageResource() {
         return mImageResource;
     }
 
-    public void setmImageResource(int mImageResource) {
+    public void setmImageResource(Uri mImageResource) {
         this.mImageResource = mImageResource;
     }
 
@@ -70,7 +71,7 @@ public class Solicitud implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mImageResource);
+        dest.writeString(this.mImageResource.toString());
         dest.writeString(this.clientName);
         dest.writeString(this.walkDate);
         dest.writeString(this.walkTime);
@@ -78,7 +79,7 @@ public class Solicitud implements Parcelable {
     }
 
     protected Solicitud(Parcel in) {
-        this.mImageResource = in.readInt();
+        this.mImageResource = Uri.parse(in.readString());
         this.clientName = in.readString();
         this.walkDate = in.readString();
         this.walkTime = in.readString();

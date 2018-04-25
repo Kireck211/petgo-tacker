@@ -56,8 +56,8 @@ public class ProfileFragment extends Fragment {
         phoneEditor = view.findViewById(R.id.user_phone_edit);
         saveButton = view.findViewById(R.id.button_save);
         userName = view.findViewById(R.id.user_name);
-
-        userName.setText(userAdmin.getName().toString());
+        if (userAdmin.getName() != null)
+            userName.setText(userAdmin.getName().toString());
 
         //profilePicture.setImageURI(Uri.parse(userAdmin.getImageUrl())); // isnt working
 
@@ -109,7 +109,7 @@ public class ProfileFragment extends Fragment {
         saveButton.setVisibility(View.VISIBLE);
     }
 
-    public static Bitmap getBitmapFromURL(String src) { // isnt working
+    /*public static Bitmap getBitmapFromURL(String src) { // isnt working
         try {
             URL url = new URL(src);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -122,7 +122,7 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
-    }
+    }*/
 }
 
 

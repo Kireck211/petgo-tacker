@@ -133,7 +133,7 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
                 loginUser.setProvider(GOOGLE_PROVIDER);
             }
 
-            Intent bottomNavActivity = new Intent(this, ActivityBottomNav.class);
+            Intent bottomNavActivity = new Intent(this, ActivityBottomMain.class);
             bottomNavActivity.putExtra(PARCELABLE_USER, loginUser);
             startActivity(bottomNavActivity);
             finish();

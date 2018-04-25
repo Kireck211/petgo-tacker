@@ -1,14 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<!--
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <TextView
+        android:id="@+id/paseador_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="20dp"
+        android:text="Ganancias de esta semana:"
+        android:textStyle="bold"
+        android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/paseador_ganancia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/paseador_text"
+        android:layout_centerHorizontal="true"
+        android:textSize="50sp"
+        android:text="$999999.99"
+        />
+    <TextView
+        android:id="@+id/paseador_text_cali"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/paseador_ganancia"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="30dp"
+        android:text="Calificacion promedio:"/>
+    <TextView
+        android:id="@+id/paseador_calificacion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/paseador_text_cali"
+        android:paddingTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="16sp"
+        android:text="5.0"/>
 
-        -->
-</ScrollView>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/paseador_calificacion"
+        android:layout_toEndOf="@+id/paseador_calificacion"
+        android:src="@drawable/ic_star" />
+
+</RelativeLayout>
