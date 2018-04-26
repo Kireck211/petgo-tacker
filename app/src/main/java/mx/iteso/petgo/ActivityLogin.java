@@ -165,6 +165,7 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
                         for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             mUser = snapshot.getValue(User.class);
                             mUser.setProvider(finalProvider);
+                            mUser.setKeyDatabase(snapshot.getKey());
                         }
                     } else {
                         mUser.setTokenId(user.getUid());
@@ -177,10 +178,11 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
 
                         String userId = mReference.child("users").push().getKey();
                         mReference.child("users").child(userId).setValue(mUser);
+                        mUser.setKeyDatabase(userId);
                     }
                     saveUser();
                     Intent bottomNavActivity = new Intent(ActivityLogin.this, ActivityBottomMain.class);
-                    bottomNavActivity.putExtra(PARCELABLE_USER, loginUser);
+                    bottomNavActivity.putExtra(PARCELABLE_USER, mUser);
                     startActivity(bottomNavActivity);
                     finish();
                 }

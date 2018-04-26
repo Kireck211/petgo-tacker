@@ -38,23 +38,30 @@ import mx.iteso.petgo.beans.Trip;
 import mx.iteso.petgo.beans.User;
 import mx.iteso.petgo.recycler.RecyclerAdapter;
 
+import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
+
 public class NotificationFragment extends Fragment {
     private DatabaseReference mReference;
     private User mUser;
-    private FirebaseDatabase mDb;
+    private FirebaseDatabase mDataBase;
+    private ArrayList<Trip> trackerTrips;
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Solicitud> solicitudes;
+    private Bundle bundle = new Bundle();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_notifications,container,false);
         //INSERTAR DATOS AL FRAGMENTO
         mRecyclerView = view.findViewById(R.id.recyclerView);
-        dataRequest();
+        bundle = this.getArguments();
+        if (bundle != null) {
+            mUser = bundle.getParcelable(PARCELABLE_USER);
+        }
+        tripRequest(); // para verificar que hace bien el request
         exampleList(); // temporal hasta tener DB
         putSolicitud();
         buildRecyclerView();
@@ -129,28 +136,27 @@ public class NotificationFragment extends Fragment {
         solicitudes.add(new Solicitud("http://www.indiehoy.com/wp-content/uploads/2018/01/Apu-Nahasapeemapetilon.jpg","Jacinto Perez","15/15/15","60 mins","Periferico sur 759"));
     }
 
-    public void dataRequest() {
-        mReference = FirebaseDatabase.getInstance().getReference();
-        final Trip trips = new Trip();
-        final Map<String, Trip> userTrips = new HashMap<>();
-        Query query = mReference.child("users")
-                .orderByChild("tokenId");
-        query.addValueEventListener(new ValueEventListener() {
+    public void tripRequest() {
+        mDataBase = FirebaseDatabase.getInstance();
+        //mReference =    mDataBase.getReference("users/"+mUser.getKeyDatabase()+"/trips");
+        mReference =    mDataBase.getReference("users/23489jk/trips");
+        mReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                trackerTrips = new ArrayList<>();
+                Trip trip;
                 if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Log.d("SNAPSHOT: ", "onDataChange: "+snapshot);
-                        mUser = snapshot.getValue(User.class); // AQUI ESTA EL PEDO DE INCOMPATIBILIDAD DE DATOS
-                        if (mUser.getType().toString().equals("client")) {
-                            Log.e("CLIENTE", "CLIENT for new TRIP: "+mUser.getName().toString());
-                            userTrips.putAll(mUser.getTrips());
-                            for (Map.Entry<String, Trip> entry : userTrips.entrySet()) {
-                                Log.w("TRIPS DATA", "trips: "+entry.getValue());
-                            }
-                        }
+                    for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
+                        Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
+                        trip = snapshot.getValue(Trip.class);
+                        trackerTrips.add(trip);
+                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+trip );
                     }
+                } else {
+                    Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
                 }
+
             }
 
             @Override
@@ -158,5 +164,15 @@ public class NotificationFragment extends Fragment {
 
             }
         });
+
+
+    }
+
+    public void tripLocRequest() {
+
+    }
+
+    public void tripAlertRequest() {
+
     }
 }
