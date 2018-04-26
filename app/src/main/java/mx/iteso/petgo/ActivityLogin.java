@@ -1,6 +1,7 @@
 package mx.iteso.petgo;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
@@ -27,17 +28,33 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+
+import mx.iteso.petgo.beans.Address;
+import mx.iteso.petgo.beans.Pet;
 import mx.iteso.petgo.beans.User;
 import mx.iteso.petgo.databinding.ActivityLoginBinding;
 import static mx.iteso.petgo.utils.Constants.FACEBOOK_PROVIDER;
 import static mx.iteso.petgo.utils.Constants.GOOGLE_PROVIDER;
 import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
+import static mx.iteso.petgo.utils.Constants.TYPE;
+import static mx.iteso.petgo.utils.Constants.USER_PREFERENCES;
+import static mx.iteso.petgo.utils.Constants.USER_PROVIDER;
+import static mx.iteso.petgo.utils.Constants.USER_TOKEN;
 
 public class ActivityLogin extends ActivityBase implements View.OnClickListener {
 
     ActivityLoginBinding mBinding;
     private FirebaseAuth mAuth;
+    private DatabaseReference mReference;
+    private User mUser = new User();
     private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN_GOOGLE = 9001;
     private CallbackManager mCallbackManager;
@@ -46,6 +63,7 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+        mReference = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
 
@@ -112,17 +130,18 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
     }
-    private void updateUI(FirebaseUser user) {
+    private void updateUI(final FirebaseUser user) {
         hideProgressDialog();
         /**
          * https://stackoverflow.com/questions/39249043/firebase-auth-get-additional-user-info-age-gender?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
          * */
         if (user != null) { // User authenticated
-            User loginUser = new User();
-            loginUser.setEmail(user.getEmail());
+            final User loginUser = new User();
+            loginUser.setType(TYPE);
             loginUser.setName(user.getDisplayName());
             loginUser.setTokenId(user.getUid());
-            loginUser.setImageUrl(user.getPhotoUrl().toString());
+            loginUser.setPicture(user.getPhotoUrl().toString());
+
             String provider = null;
             if (user.getProviderData().size() > 1)
                 provider = user.getProviderData().get(1).getProviderId();
@@ -133,11 +152,48 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
                 loginUser.setProvider(GOOGLE_PROVIDER);
             }
 
-            Intent bottomNavActivity = new Intent(this, ActivityBottomMain.class);
-            bottomNavActivity.putExtra(PARCELABLE_USER, loginUser);
-            startActivity(bottomNavActivity);
-            finish();
+            Query query = mReference.child("users")
+                    .orderByChild("tokenId")
+                    .limitToFirst(1)
+                    .equalTo(user.getUid());
+
+            final String finalProvider = provider;
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            mUser = snapshot.getValue(User.class);
+                            mUser.setProvider(finalProvider);
+                        }
+                    } else {
+                        mUser.setTokenId(user.getUid());
+                        mUser.setName(user.getDisplayName());
+                        mUser.setAvailability(false); // by default
+                        mUser.setPicture(user.getPhotoUrl().toString());
+                        mUser.setType(TYPE);
+                        mUser.setBalance(0.0f);
+                        mUser.setProvider(finalProvider);
+
+                        String userId = mReference.child("users").push().getKey();
+                        mReference.child("users").child(userId).setValue(mUser);
+                    }
+                    saveUser();
+                    Intent bottomNavActivity = new Intent(ActivityLogin.this, ActivityBottomMain.class);
+                    bottomNavActivity.putExtra(PARCELABLE_USER, loginUser);
+                    startActivity(bottomNavActivity);
+                    finish();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
         }
+
     }
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d("Firebase Google Auth", "firebaseAuthWithGoogle:" + acct.getId());
@@ -189,6 +245,14 @@ public class ActivityLogin extends ActivityBase implements View.OnClickListener 
                     }
                 });
     }
+    private void saveUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences(USER_PREFERENCES, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(USER_TOKEN, mUser.getTokenId());
+        editor.putString(USER_PROVIDER, mUser.getProvider());
+        editor.apply();
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

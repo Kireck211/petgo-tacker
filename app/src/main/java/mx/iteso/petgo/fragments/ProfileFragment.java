@@ -18,6 +18,16 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -31,13 +41,17 @@ import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
 
 public class ProfileFragment extends Fragment {
 
-    private CircleImageView profilePicture;
+    private DatabaseReference mReference;
+    private User mUser;
+    private FirebaseAuth mAuth;
     private ImageView editPhone;
     private TextView phoneNumber;
     private TextView userName;
     private Switch enableVisibleSwitch;
     private EditText phoneEditor;
+    private EditText nameEditor;
     private Button saveButton;
+    public SimpleDraweeView draweeView;
     private User userAdmin;
     Bundle bundle;
 
@@ -45,35 +59,33 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile,container,false);
-        bundle = this.getArguments();
+        mAuth = FirebaseAuth.getInstance();
+        /*bundle = this.getArguments();
         if (bundle != null) {
             userAdmin = bundle.getParcelable(PARCELABLE_USER);
-        }
-        profilePicture = view.findViewById(R.id.profile);
+        }*/
+
+        draweeView = view.findViewById(R.id.profile);
         editPhone = view.findViewById(R.id.edit);
         phoneNumber = view.findViewById(R.id.user_phone);
         enableVisibleSwitch = view.findViewById(R.id.switch_availability);
         phoneEditor = view.findViewById(R.id.user_phone_edit);
+        nameEditor = view.findViewById(R.id.user_name_edit);
         saveButton = view.findViewById(R.id.button_save);
         userName = view.findViewById(R.id.user_name);
-        if (userAdmin.getName() != null)
-            userName.setText(userAdmin.getName().toString());
-
-        //profilePicture.setImageURI(Uri.parse(userAdmin.getImageUrl())); // isnt working
-
-        //profilePicture.setImageBitmap(getBitmapFromURL(userAdmin.getImageUrl())); // isnt working
+        profileDataRequest();
 
         editPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editPhoneMethod(); // por si cambia de telefono, lo demas lo agarra de google
+                editInfoMethod(); // por si cambia de telefono, lo demas lo agarra de google
             }
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveNewPhone();
+                saveNewInfo();
                 // ejecutar codigo para actualizar la bd
             }
         });
@@ -94,35 +106,78 @@ public class ProfileFragment extends Fragment {
             enableVisibleSwitch.setChecked(savedInstanceState.getBoolean("SwitchEnable"));
     }
 
-    private void saveNewPhone() {
+    private void saveNewInfo() {
         String phone = phoneEditor.getText().toString();
-        if ( !phone.equals("")) {
-            phoneNumber.setText(phone);
+        String name = nameEditor.getText().toString();
+        if ( !phone.equals("")&&!name.equals("")) {
+            updatePhoneAndName(phone,name);
+        }
+        else if (!phone.equals("")&&name.equals("")) {
+            updatePhone(phone);
+        }
+        else if (phone.equals("")&&!name.equals("")) {
+            updateName(name);
+        }
+        else {
             phoneEditor.setVisibility(View.GONE);
+            nameEditor.setVisibility(View.GONE);
             saveButton.setVisibility(View.GONE);
         }
     }
 
-    private void editPhoneMethod() {
+    private void editInfoMethod() {
         phoneEditor.setHint(phoneNumber.getText().toString());
+        nameEditor.setHint(userName.getText().toString());
         phoneEditor.setVisibility(View.VISIBLE);
+        nameEditor.setVisibility(View.VISIBLE);
         saveButton.setVisibility(View.VISIBLE);
     }
 
-    /*public static Bitmap getBitmapFromURL(String src) { // isnt working
-        try {
-            URL url = new URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }*/
+    private void updatePhone(String newPhone) {
+        phoneNumber.setText(newPhone);
+        phoneEditor.setVisibility(View.GONE);
+        nameEditor.setVisibility(View.GONE);
+        saveButton.setVisibility(View.GONE);
+        //update DB
+    }
+    private void updateName (String newName) {
+        userName.setText(newName);
+        phoneEditor.setVisibility(View.GONE);
+        nameEditor.setVisibility(View.GONE);
+        saveButton.setVisibility(View.GONE);
+        // update DB
+    }
+    private void updatePhoneAndName(String newPhone, String newName) {
+        // update DB
+    }
+
+    public void profileDataRequest() {
+        mReference = FirebaseDatabase.getInstance().getReference();
+        String name = "";
+        final FirebaseUser user = mAuth.getCurrentUser();
+        Query query = mReference.child("users")
+                .orderByChild("tokenId")
+                .limitToFirst(1)
+                .equalTo(user.getUid());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Log.d("SNAPSHOT: ", "onDataChange: "+snapshot);
+                        mUser = snapshot.getValue(User.class);
+                        userName.setText((CharSequence) mUser.getName());
+                        draweeView.setImageURI(Uri.parse(mUser.getPicture()));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 }
 
 
