@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -32,9 +33,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import mx.iteso.petgo.R;
+import mx.iteso.petgo.beans.Phone;
 import mx.iteso.petgo.beans.User;
 
 import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
@@ -51,8 +56,9 @@ public class ProfileFragment extends Fragment {
     private EditText phoneEditor;
     private EditText nameEditor;
     private Button saveButton;
+    private String userId;
     public SimpleDraweeView draweeView;
-    private User userAdmin;
+    private Map<String,Phone> userPhone;
     Bundle bundle;
 
     @Nullable
@@ -60,10 +66,6 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile,container,false);
         mAuth = FirebaseAuth.getInstance();
-        /*bundle = this.getArguments();
-        if (bundle != null) {
-            userAdmin = bundle.getParcelable(PARCELABLE_USER);
-        }*/
 
         draweeView = view.findViewById(R.id.profile);
         editPhone = view.findViewById(R.id.edit);
@@ -87,6 +89,21 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 saveNewInfo();
                 // ejecutar codigo para actualizar la bd
+            }
+        });
+
+        enableVisibleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    //update db
+                    Log.e("Switch checked", "onCheckedChanged: "+isChecked );
+                    disponibilidad(isChecked);
+                } else {
+                    //update db
+                    Log.e("Switch checked", "onCheckedChanged: "+isChecked );
+                    disponibilidad(isChecked);
+                }
             }
         });
 
@@ -131,6 +148,7 @@ public class ProfileFragment extends Fragment {
         phoneEditor.setVisibility(View.VISIBLE);
         nameEditor.setVisibility(View.VISIBLE);
         saveButton.setVisibility(View.VISIBLE);
+
     }
 
     private void updatePhone(String newPhone) {
@@ -139,6 +157,15 @@ public class ProfileFragment extends Fragment {
         nameEditor.setVisibility(View.GONE);
         saveButton.setVisibility(View.GONE);
         //update DB
+        Random r = new Random();
+        int a = r.nextInt((100000-10)+1)+10;
+        HashMap<String,Phone> phones = new HashMap<>();
+        Phone number = new Phone();
+        number.setPhone(newPhone);
+        phones.put("number"+a,number);
+        mReference = FirebaseDatabase.getInstance().getReference();
+        mReference.child("users").child(userId).child("phone").setValue(phones);
+        Log.e("ID", "disponibilidad: "+userId );
     }
     private void updateName (String newName) {
         userName.setText(newName);
@@ -146,15 +173,35 @@ public class ProfileFragment extends Fragment {
         nameEditor.setVisibility(View.GONE);
         saveButton.setVisibility(View.GONE);
         // update DB
+        mReference = FirebaseDatabase.getInstance().getReference();
+        mReference.child("users").child(userId).child("name").setValue(newName);
+        Log.e("ID", "disponibilidad: "+userId );
     }
-    private void updatePhoneAndName(String newPhone, String newName) {
+    private void updatePhoneAndName(final String newPhone, final String newName) {
         // update DB
+        phoneNumber.setText(newPhone);
+        userName.setText(newName);
+        phoneEditor.setVisibility(View.GONE);
+        nameEditor.setVisibility(View.GONE);
+        saveButton.setVisibility(View.GONE);
+        //update DB
+        Random r = new Random();
+        int a = r.nextInt((100000-10)+1)+10;
+        HashMap<String,Phone> phones = new HashMap<>();
+        Phone number = new Phone();
+        number.setPhone(newPhone);
+        phones.put("number"+a,number);
+        mReference = FirebaseDatabase.getInstance().getReference();
+        mReference.child("users").child(userId).child("phone").setValue(phones);
+        mReference.child("users").child(userId).child("name").setValue(newName);
+        Log.e("ID", "disponibilidad: "+userId );
+
     }
 
     public void profileDataRequest() {
         mReference = FirebaseDatabase.getInstance().getReference();
-        String name = "";
         final FirebaseUser user = mAuth.getCurrentUser();
+        //userId = user.getUid(); /// puede dar null pointer
         Query query = mReference.child("users")
                 .orderByChild("tokenId")
                 .limitToFirst(1)
@@ -165,9 +212,18 @@ public class ProfileFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         Log.d("SNAPSHOT: ", "onDataChange: "+snapshot);
+                        userId = snapshot.getKey();
                         mUser = snapshot.getValue(User.class);
                         userName.setText((CharSequence) mUser.getName());
                         draweeView.setImageURI(Uri.parse(mUser.getPicture()));
+                        enableVisibleSwitch.setChecked(mUser.isAvailability());
+                        userPhone = mUser.getPhone();
+                        for (String key:userPhone.keySet()) {
+                            Phone value = userPhone.get(key);
+                            phoneNumber.setText(value.getPhone());
+                            break;
+                        }
+
                     }
                 }
             }
@@ -178,6 +234,13 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+
+    public void disponibilidad(boolean enable) {
+        mReference = FirebaseDatabase.getInstance().getReference();
+        mReference.child("users").child(userId).child("availability").setValue(enable);
+        Log.e("ID", "disponibilidad: "+userId );
+    }
+
 }
 
 

@@ -33,6 +33,8 @@ import java.util.PrimitiveIterator;
 
 import mx.iteso.petgo.ActivityCliente;
 import mx.iteso.petgo.R;
+import mx.iteso.petgo.beans.Alert;
+import mx.iteso.petgo.beans.Location;
 import mx.iteso.petgo.beans.Solicitud;
 import mx.iteso.petgo.beans.Trip;
 import mx.iteso.petgo.beans.User;
@@ -45,6 +47,8 @@ public class NotificationFragment extends Fragment {
     private User mUser;
     private FirebaseDatabase mDataBase;
     private ArrayList<Trip> trackerTrips;
+    private ArrayList<Alert> trackerAlerts;
+    private ArrayList<Location> trackerLocs;
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -61,7 +65,7 @@ public class NotificationFragment extends Fragment {
         if (bundle != null) {
             mUser = bundle.getParcelable(PARCELABLE_USER);
         }
-        tripRequest(); // para verificar que hace bien el request
+        tripAlertRequest(); // para verificar que hace bien el request
         exampleList(); // temporal hasta tener DB
         putSolicitud();
         buildRecyclerView();
@@ -136,22 +140,23 @@ public class NotificationFragment extends Fragment {
         solicitudes.add(new Solicitud("http://www.indiehoy.com/wp-content/uploads/2018/01/Apu-Nahasapeemapetilon.jpg","Jacinto Perez","15/15/15","60 mins","Periferico sur 759"));
     }
 
-    public void tripRequest() {
+    public void tripRequest(ArrayList<Alert> alertas, ArrayList<Location> loc) {
         mDataBase = FirebaseDatabase.getInstance();
         //mReference =    mDataBase.getReference("users/"+mUser.getKeyDatabase()+"/trips");
-        mReference =    mDataBase.getReference("users/23489jk/trips");
+        mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/alerts");
         mReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 trackerTrips = new ArrayList<>();
                 Trip trip;
+                ;
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
                         Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
                         trip = snapshot.getValue(Trip.class);
-                        trackerTrips.add(trip);
-                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+trip );
+                        //trackerTrips.add(a);
+                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+trip);
                     }
                 } else {
                     Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
@@ -169,10 +174,59 @@ public class NotificationFragment extends Fragment {
     }
 
     public void tripLocRequest() {
+        mDataBase = FirebaseDatabase.getInstance();
+        mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/locations");
+        mReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                trackerLocs = new ArrayList<>();
+                Location loc;
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
+                        Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
+                        loc = snapshot.getValue(Location.class);
+                        trackerLocs.add(loc);
+                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+loc );
+                    }
+                } else {
+                    Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
+                }
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    public void tripAlertRequest() {
 
+    public void tripAlertRequest() {
+        mDataBase = FirebaseDatabase.getInstance();
+        mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/alerts");
+        mReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                trackerAlerts = new ArrayList<>();
+                Alert alert;
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
+                        Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
+                        alert = snapshot.getValue(Alert.class);
+                        trackerAlerts.add(alert);
+                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+alert );
+                    }
+                } else {
+                    Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

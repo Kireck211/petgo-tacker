@@ -46,5 +46,10 @@
         android:layout_alignBottom="@+id/paseador_calificacion"
         android:layout_toEndOf="@+id/paseador_calificacion"
         android:src="@drawable/ic_star" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/paseador_calificacion">
 
+    </RelativeLayout>
 </RelativeLayout>
