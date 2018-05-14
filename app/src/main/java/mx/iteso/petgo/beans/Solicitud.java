@@ -8,29 +8,49 @@ import android.os.Parcelable;
 
 public class Solicitud implements Parcelable {
     private Uri mImageResource;
+    private Uri mPetResource;
     private String clientName = "";
     private String walkDate = "";
     private String walkTime = "";
     private String clientAddress = "";
     private String tokenId = "";
+    private User user;
 
     public Solicitud() {
     }
 
-    public Solicitud(String mImageResource, String clientName, String walkDate, String walkTime, String clientAddress) {
-        this.mImageResource = Uri.parse(mImageResource);
+    public Solicitud(Uri mImageResource, Uri mPetResource, String clientName, String walkDate, String walkTime, String clientAddress, String tokenId) {
+        this.mImageResource = mImageResource;
+        this.mPetResource = mPetResource;
         this.clientName = clientName;
         this.walkDate = walkDate;
         this.walkTime = walkTime;
         this.clientAddress = clientAddress;
+        this.tokenId = tokenId;
     }
-    
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public Uri getmImageResource() {
         return mImageResource;
     }
 
     public void setmImageResource(Uri mImageResource) {
         this.mImageResource = mImageResource;
+    }
+
+    public Uri getmPetResource() {
+        return mPetResource;
+    }
+
+    public void setmPetResource(Uri mPetResource) {
+        this.mPetResource = mPetResource;
     }
 
     public String getClientName() {
@@ -81,20 +101,24 @@ public class Solicitud implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(this.mImageResource, flags);
+        dest.writeParcelable(this.mPetResource, flags);
         dest.writeString(this.clientName);
         dest.writeString(this.walkDate);
         dest.writeString(this.walkTime);
         dest.writeString(this.clientAddress);
         dest.writeString(this.tokenId);
+        dest.writeParcelable(this.user, flags);
     }
 
     protected Solicitud(Parcel in) {
         this.mImageResource = in.readParcelable(Uri.class.getClassLoader());
+        this.mPetResource = in.readParcelable(Uri.class.getClassLoader());
         this.clientName = in.readString();
         this.walkDate = in.readString();
         this.walkTime = in.readString();
         this.clientAddress = in.readString();
         this.tokenId = in.readString();
+        this.user = in.readParcelable(User.class.getClassLoader());
     }
 
     public static final Creator<Solicitud> CREATOR = new Creator<Solicitud>() {

@@ -1,5 +1,9 @@
 package mx.iteso.petgo.fragments;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -8,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +25,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,11 +49,17 @@ import java.util.Map;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import mx.iteso.petgo.ActivityBottomMain;
+import mx.iteso.petgo.ActivityLogin;
 import mx.iteso.petgo.R;
 import mx.iteso.petgo.beans.Phone;
+import mx.iteso.petgo.beans.Solicitud;
 import mx.iteso.petgo.beans.User;
 
+import static mx.iteso.petgo.utils.Constants.FACEBOOK_PROVIDER;
+import static mx.iteso.petgo.utils.Constants.GOOGLE_PROVIDER;
 import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
+import static mx.iteso.petgo.utils.Constants.USER_PREFERENCES;
 
 public class ProfileFragment extends Fragment {
 
@@ -50,6 +67,7 @@ public class ProfileFragment extends Fragment {
     private User mUser;
     private FirebaseAuth mAuth;
     private ImageView editPhone;
+    private ImageView logoutImg;
     private TextView phoneNumber;
     private TextView userName;
     private Switch enableVisibleSwitch;
@@ -59,6 +77,8 @@ public class ProfileFragment extends Fragment {
     private String userId;
     public SimpleDraweeView draweeView;
     private Map<String,Phone> userPhone;
+    private GoogleSignInClient mGoogleSignInClient;
+
     Bundle bundle;
 
     @Nullable
@@ -67,6 +87,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile,container,false);
         mAuth = FirebaseAuth.getInstance();
 
+        logoutImg = view.findViewById(R.id.logout);
         draweeView = view.findViewById(R.id.profile);
         editPhone = view.findViewById(R.id.edit);
         phoneNumber = view.findViewById(R.id.user_phone);
@@ -75,12 +96,36 @@ public class ProfileFragment extends Fragment {
         nameEditor = view.findViewById(R.id.user_name_edit);
         saveButton = view.findViewById(R.id.button_save);
         userName = view.findViewById(R.id.user_name);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(getContext(), gso);
         profileDataRequest();
 
         editPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editInfoMethod(); // por si cambia de telefono, lo demas lo agarra de google
+            }
+        });
+
+        logoutImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Desea cerrar sesion?")
+                        .setPositiveButton("Salir", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                logoutMethod(); // logout
+                            }
+                        })
+                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //Toast.makeText(getActivity(), "Borrado de solicitud cancelado", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                builder.create().show();
             }
         });
 
@@ -121,6 +166,39 @@ public class ProfileFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null)
             enableVisibleSwitch.setChecked(savedInstanceState.getBoolean("SwitchEnable"));
+    }
+
+    private void logoutMethod() {
+        final String provider = mUser.getProvider();
+        if (provider.equals(FACEBOOK_PROVIDER)) {
+            LoginManager.getInstance().logOut();
+            signOutCallback();
+        } else if (provider.contains(GOOGLE_PROVIDER)) {
+            mGoogleSignInClient.signOut().addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    signOutCallback();
+                }
+            });
+        }
+    }
+
+    private void signOutCallback() {
+        FirebaseAuth.getInstance().signOut();
+        deleteUser();
+        Intent intent = new Intent(getContext(), ActivityLogin.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        ((ActivityBottomMain) getContext()).finish();
+    }
+
+    private void deleteUser() {
+        SharedPreferences sharedPreferences =
+                this.getActivity().getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
     }
 
     private void saveNewInfo() {

@@ -7,12 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".ActivityCliente">
 
-    <ImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/header_cover_image"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/pet"
+        fresco:placeholderImage="@drawable/pet"
         />
 
     <com.facebook.drawee.view.SimpleDraweeView
@@ -29,6 +29,7 @@
         fresco:placeholderImage="@drawable/my_drawable"
         />
 
+
     <RelativeLayout
         android:id="@+id/client_profile_layout"
         android:layout_width="match_parent"
@@ -37,7 +38,16 @@
         android:background="#ebca0707"
         android:elevation="4dp"
         android:paddingBottom="24dp">
+        <ImageView
+            android:id="@+id/stopTrip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="11dp"
+            android:clickable="true"
+            android:src="@drawable/ic_stop" />
 
         <TextView
             android:id="@+id/client_name"
@@ -45,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="70dp"
-            android:text="Client Name"
+            android:text=""
             android:textColor="#fff"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -57,7 +67,7 @@
             android:layout_below="@+id/client_name"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="Phone number"
+            android:text=""
             android:textColor="#fff"
             android:textSize="18sp" />
 
