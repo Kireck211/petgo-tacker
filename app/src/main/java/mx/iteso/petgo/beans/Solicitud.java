@@ -12,6 +12,7 @@ public class Solicitud implements Parcelable {
     private String walkDate = "";
     private String walkTime = "";
     private String clientAddress = "";
+    private String tokenId = "";
 
     public Solicitud() {
     }
@@ -64,6 +65,14 @@ public class Solicitud implements Parcelable {
         this.clientAddress = clientAddress;
     }
 
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -71,22 +80,24 @@ public class Solicitud implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mImageResource.toString());
+        dest.writeParcelable(this.mImageResource, flags);
         dest.writeString(this.clientName);
         dest.writeString(this.walkDate);
         dest.writeString(this.walkTime);
         dest.writeString(this.clientAddress);
+        dest.writeString(this.tokenId);
     }
 
     protected Solicitud(Parcel in) {
-        this.mImageResource = Uri.parse(in.readString());
+        this.mImageResource = in.readParcelable(Uri.class.getClassLoader());
         this.clientName = in.readString();
         this.walkDate = in.readString();
         this.walkTime = in.readString();
         this.clientAddress = in.readString();
+        this.tokenId = in.readString();
     }
 
-    public static final Parcelable.Creator<Solicitud> CREATOR = new Parcelable.Creator<Solicitud>() {
+    public static final Creator<Solicitud> CREATOR = new Creator<Solicitud>() {
         @Override
         public Solicitud createFromParcel(Parcel source) {
             return new Solicitud(source);

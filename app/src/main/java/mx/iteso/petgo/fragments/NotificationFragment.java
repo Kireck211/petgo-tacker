@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,7 @@ import mx.iteso.petgo.ActivityCliente;
 import mx.iteso.petgo.R;
 import mx.iteso.petgo.beans.Alert;
 import mx.iteso.petgo.beans.Location;
+import mx.iteso.petgo.beans.Phone;
 import mx.iteso.petgo.beans.Solicitud;
 import mx.iteso.petgo.beans.Trip;
 import mx.iteso.petgo.beans.User;
@@ -44,29 +46,38 @@ import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
 
 public class NotificationFragment extends Fragment {
     private DatabaseReference mReference;
+    private FirebaseAuth mAuth;
     private User mUser;
+    private String userId;
     private FirebaseDatabase mDataBase;
     private ArrayList<Trip> trackerTrips;
     private ArrayList<Alert> trackerAlerts;
     private ArrayList<Location> trackerLocs;
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager;
     private ArrayList<Solicitud> solicitudes;
     private Bundle bundle = new Bundle();
+    private Map<String,Location> clientLocation;
+
+    public static NotificationFragment newInstance(User user) {
+        NotificationFragment notificationFragment = new NotificationFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(PARCELABLE_USER, user);
+        notificationFragment.setArguments(bundle);
+
+        return notificationFragment;
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notifications,container,false);
         //INSERTAR DATOS AL FRAGMENTO
+        mAuth = FirebaseAuth.getInstance();
         mRecyclerView = view.findViewById(R.id.recyclerView);
-        bundle = this.getArguments();
-        if (bundle != null) {
-            mUser = bundle.getParcelable(PARCELABLE_USER);
-        }
-        tripAlertRequest(); // para verificar que hace bien el request
-        exampleList(); // temporal hasta tener DB
+
+        mUser = getArguments().getParcelable(PARCELABLE_USER);
         putSolicitud();
         buildRecyclerView();
         return view;
@@ -76,19 +87,34 @@ public class NotificationFragment extends Fragment {
 
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager.setReverseLayout(true);
+        solicitudes = new ArrayList<>();
         mAdapter = new RecyclerAdapter(solicitudes);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
         mAdapter.setOnItemClickListener(new RecyclerAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(final int position) {
                 solicitudes.get(position);
-                Intent intent = new Intent(getActivity(), ActivityCliente.class);
-                intent.putExtra("PICTURE",(solicitudes.get(position).getmImageResource().toString()));
-                intent.putExtra("NAME",solicitudes.get(position).getClientName());
-                intent.putExtra("ADDRESS",solicitudes.get(position).getClientAddress());
-                startActivity(intent);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Ver solicitud de paseo?")
+                        .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(getActivity(), ActivityCliente.class);
+                                intent.putExtra("PICTURE",(solicitudes.get(position).getmImageResource().toString()));
+                                intent.putExtra("NAME",solicitudes.get(position).getClientName());
+                                intent.putExtra("ADDRESS",solicitudes.get(position).getClientAddress());
+                                startActivity(intent);
+                                //HACER QUERY PARA BORRARLA DE LA BD
+                            }
+                        })
+                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Toast.makeText(getActivity(), "Aceptar solicitud para ver datos de cliente", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                builder.create().show();
             }
 
             @Override
@@ -104,6 +130,65 @@ public class NotificationFragment extends Fragment {
             //solicitudes.add(new Solicitud(elemento.getImagen,elemento.getNombre,elemento.getFecha,elemento.getTiempo,elemento.getDireccion));
             //solicitudes.add(new Solicitud("https://i.ytimg.com/vi/a_AqYohDuwM/maxresdefault.jpg","Juan Perez","12/12/12","30 mins","Periferico sur 456"));
        // }
+        mReference = FirebaseDatabase.getInstance().getReference();
+        mReference.child("users").child(mUser.getKeyDatabase()).child("trips");
+
+        ValueEventListener tripListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    ArrayList<Trip> tripArrayList = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Trip trip = snapshot.getValue(Trip.class);
+                        trip.setTokenId(snapshot.getKey());
+                        tripArrayList.add(trip);
+                    }
+                    tripSolicitudAdapter(tripArrayList);
+                    mAdapter.setTrips(solicitudes);
+                } else {
+                    mAdapter.setTrips(new ArrayList<Solicitud>());
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mReference.child("users").child(mUser.getKeyDatabase()).child("trips").addValueEventListener(tripListener);
+
+
+    }
+
+    private void tripSolicitudAdapter(ArrayList<Trip> tripArraylist) {
+        Solicitud solicitud;
+        User cliente;
+        String[] date_hour;
+        String fecha;
+        String hora;
+        solicitudes = new ArrayList<>();
+        for (Trip t: tripArraylist) {
+            cliente = t.getUser();
+            solicitud = new Solicitud();
+            solicitud.setClientName(cliente.getName()); //name
+            solicitud.setmImageResource(Uri.parse(cliente.getPicture())); //picture
+            solicitud.setTokenId(t.getTokenId());
+            date_hour = t.getDate_hour().split(" ");
+            fecha = date_hour[0];
+            hora = date_hour[1];
+            solicitud.setWalkDate(fecha); //fecha
+            solicitud.setWalkTime(hora); //hora
+            clientLocation = t.getLocations(); // location
+            for (String key:clientLocation.keySet()) { //lat lon
+                Location value = clientLocation.get(key);
+                String address = value.getLatitude()+","+value.getLongitude();
+                solicitud.setClientAddress(address);
+                break;
+            }
+            solicitudes.add(solicitud); // agrega a solicitudes para recycler
+        }
+
     }
 
     public void insertItem(int position) { // debe actualizar la BD
@@ -114,18 +199,24 @@ public class NotificationFragment extends Fragment {
     public void removeItem(final int position) { // debe actualizar la BD
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final Solicitud solicitud = solicitudes.get(position);
         builder.setMessage("Eliminar solicitud de paseo?")
                 .setPositiveButton("Borrar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        solicitudes.remove(position);
-                        mAdapter.notifyItemRemoved(position);
-                        buildRecyclerView();
+                        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference()
+                                .child("users").child(mUser.getKeyDatabase()).child("trips")
+                                .child(solicitud.getTokenId());
+                        mDatabase.removeValue();
+
+                        //solicitudes.remove(position);
+                        //mAdapter.notifyItemRemoved(position);
+                        //buildRecyclerView();
                         //HACER QUERY PARA BORRARLA DE LA BD
                     }
                 })
                 .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(getActivity(), "Borrado de solicitud cancelado", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getActivity(), "Borrado de solicitud cancelado", Toast.LENGTH_SHORT).show();
                     }
                 });
         builder.create().show();
@@ -173,60 +264,25 @@ public class NotificationFragment extends Fragment {
 
     }
 
-    public void tripLocRequest() {
-        mDataBase = FirebaseDatabase.getInstance();
-        mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/locations");
-        mReference.addValueEventListener(new ValueEventListener() {
+    public boolean isThereTrip() {///????
+        mReference = FirebaseDatabase.getInstance().getReference();
+        ValueEventListener tripListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                trackerLocs = new ArrayList<>();
-                Location loc;
                 if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
-                        Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
-                        loc = snapshot.getValue(Location.class);
-                        trackerLocs.add(loc);
-                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+loc );
-                    }
-                } else {
-                    Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
+                    Trip trip = dataSnapshot.getValue(Trip.class);
                 }
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        mReference.addValueEventListener(tripListener);
+
+
+        return false;
     }
 
-
-    public void tripAlertRequest() {
-        mDataBase = FirebaseDatabase.getInstance();
-        mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/alerts");
-        mReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                trackerAlerts = new ArrayList<>();
-                Alert alert;
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot:dataSnapshot.getChildren()) {
-                        Log.e("SANPSHOR", "QUE ESTA PASANDO: "+snapshot);
-                        alert = snapshot.getValue(Alert.class);
-                        trackerAlerts.add(alert);
-                        Log.e("TRY OF SNAPSHOT", "TRIPS: "+alert );
-                    }
-                } else {
-                    Log.e("TRY OF SNAPSHOT", "NO TRIPS YET");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 }

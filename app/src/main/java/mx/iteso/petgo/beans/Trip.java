@@ -14,12 +14,32 @@ public class Trip implements Parcelable {
     private double amount;
     private String date_hour;
     private Map<String, Location> locations;
+    private Map<String, Location> address;
     private String status;
     private int time;
     private User user;
+    private String pet;
 
     public Trip() {
         alerts = new HashMap<>();
+        locations = new HashMap<>();
+        address = new HashMap<>();
+    }
+
+    public Map<String, Location> getAddress() {
+        return address;
+    }
+
+    public void setAddress(Map<String, Location> address) {
+        this.address = address;
+    }
+
+    public String getPet() {
+        return pet;
+    }
+
+    public void setPet(String pet) {
+        this.pet = pet;
     }
 
     public String getTokenId() {
@@ -106,9 +126,15 @@ public class Trip implements Parcelable {
             dest.writeString(entry.getKey());
             dest.writeParcelable(entry.getValue(), flags);
         }
+        dest.writeInt(this.address.size());
+        for (Map.Entry<String, Location> entry : this.address.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeParcelable(entry.getValue(), flags);
+        }
         dest.writeString(this.status);
         dest.writeInt(this.time);
         dest.writeParcelable(this.user, flags);
+        dest.writeString(this.pet);
     }
 
     protected Trip(Parcel in) {
@@ -129,9 +155,17 @@ public class Trip implements Parcelable {
             Location value = in.readParcelable(Location.class.getClassLoader());
             this.locations.put(key, value);
         }
+        int addressSize = in.readInt();
+        this.address = new HashMap<String, Location>(addressSize);
+        for (int i = 0; i < addressSize; i++) {
+            String key = in.readString();
+            Location value = in.readParcelable(Location.class.getClassLoader());
+            this.address.put(key, value);
+        }
         this.status = in.readString();
         this.time = in.readInt();
         this.user = in.readParcelable(User.class.getClassLoader());
+        this.pet = in.readString();
     }
 
     public static final Creator<Trip> CREATOR = new Creator<Trip>() {
@@ -145,5 +179,4 @@ public class Trip implements Parcelable {
             return new Trip[size];
         }
     };
-
 }

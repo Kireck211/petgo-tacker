@@ -80,7 +80,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter <RecyclerAdapter.Recyc
         }
     }
     public RecyclerAdapter(ArrayList<Solicitud> solicitudes) {
-        mSolicitudes = new ArrayList<>(solicitudes) ;
+        mSolicitudes = solicitudes ;
     }
     @NonNull
     @Override
@@ -103,5 +103,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter <RecyclerAdapter.Recyc
     @Override
     public int getItemCount() {
         return mSolicitudes.size();
+    }
+
+    public void setTrips(ArrayList<Solicitud> solicitudes) {
+        this.mSolicitudes = solicitudes;
+        this.notifyDataSetChanged();
     }
 }
