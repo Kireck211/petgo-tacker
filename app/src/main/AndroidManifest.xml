@@ -27,19 +27,20 @@
 
         <activity
             android:name=".ActivityLogin"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:screenOrientation="portrait"
-            >
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".solicitud.ActivitySolicitud"
-                  android:screenOrientation="portrait"/>
-        <activity android:name=".clienteinfo.ActivityClienteInfo"
-                  android:screenOrientation="portrait"/>
+        <activity
+            android:name=".solicitud.ActivitySolicitud"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".clienteinfo.ActivityClienteInfo"
+            android:screenOrientation="portrait" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -58,6 +59,11 @@
             android:label="@string/app_title"
             android:screenOrientation="portrait" />
         <activity android:name=".ActivityCliente" />
+
+        <service
+            android:name=".ServiceLocation"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

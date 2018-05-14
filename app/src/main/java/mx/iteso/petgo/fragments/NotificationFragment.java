@@ -34,8 +34,9 @@ import java.util.PrimitiveIterator;
 
 import mx.iteso.petgo.ActivityCliente;
 import mx.iteso.petgo.R;
+import mx.iteso.petgo.ServiceLocation;
 import mx.iteso.petgo.beans.Alert;
-import mx.iteso.petgo.beans.Location;
+import mx.iteso.petgo.beans.MyLocation;
 import mx.iteso.petgo.beans.Phone;
 import mx.iteso.petgo.beans.Solicitud;
 import mx.iteso.petgo.beans.Trip;
@@ -43,6 +44,8 @@ import mx.iteso.petgo.beans.User;
 import mx.iteso.petgo.recycler.RecyclerAdapter;
 
 import static mx.iteso.petgo.utils.Constants.PARCELABLE_USER;
+import static mx.iteso.petgo.utils.Constants.TOKEN_TRIP;
+import static mx.iteso.petgo.utils.Constants.TOKEN_USER;
 
 public class NotificationFragment extends Fragment {
     private DatabaseReference mReference;
@@ -52,13 +55,13 @@ public class NotificationFragment extends Fragment {
     private FirebaseDatabase mDataBase;
     private ArrayList<Trip> trackerTrips;
     private ArrayList<Alert> trackerAlerts;
-    private ArrayList<Location> trackerLocs;
+    private ArrayList<MyLocation> trackerLocs;
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
     private ArrayList<Solicitud> solicitudes;
     private Bundle bundle = new Bundle();
-    private Map<String,Location> clientLocation;
+    private Map<String,MyLocation> clientLocation;
 
     public static NotificationFragment newInstance(User user) {
         NotificationFragment notificationFragment = new NotificationFragment();
@@ -101,11 +104,16 @@ public class NotificationFragment extends Fragment {
                 builder.setMessage("Ver solicitud de paseo?")
                         .setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                Intent serviceIntent = new Intent(getContext(), ServiceLocation.class);
+                                serviceIntent.putExtra(TOKEN_USER, mUser.getKeyDatabase());
+                                serviceIntent.putExtra(TOKEN_TRIP, solicitudes.get(position).getTokenId());
+                                getActivity().startService(serviceIntent);
                                 Intent intent = new Intent(getActivity(), ActivityCliente.class);
                                 intent.putExtra("PICTURE",(solicitudes.get(position).getmImageResource().toString()));
                                 intent.putExtra("NAME",solicitudes.get(position).getClientName());
                                 intent.putExtra("ADDRESS",solicitudes.get(position).getClientAddress());
                                 startActivity(intent);
+                                // TODO sharedpreferences
                                 //HACER QUERY PARA BORRARLA DE LA BD
                             }
                         })
@@ -181,7 +189,7 @@ public class NotificationFragment extends Fragment {
             solicitud.setWalkTime(hora); //hora
             clientLocation = t.getLocations(); // location
             for (String key:clientLocation.keySet()) { //lat lon
-                Location value = clientLocation.get(key);
+                MyLocation value = clientLocation.get(key);
                 String address = value.getLatitude()+","+value.getLongitude();
                 solicitud.setClientAddress(address);
                 break;
@@ -231,7 +239,7 @@ public class NotificationFragment extends Fragment {
         solicitudes.add(new Solicitud("http://www.indiehoy.com/wp-content/uploads/2018/01/Apu-Nahasapeemapetilon.jpg","Jacinto Perez","15/15/15","60 mins","Periferico sur 759"));
     }
 
-    public void tripRequest(ArrayList<Alert> alertas, ArrayList<Location> loc) {
+    public void tripRequest(ArrayList<Alert> alertas, ArrayList<MyLocation> loc) {
         mDataBase = FirebaseDatabase.getInstance();
         //mReference =    mDataBase.getReference("users/"+mUser.getKeyDatabase()+"/trips");
         mReference =    mDataBase.getReference("users/23489jk/trips/23424dsfadsf/alerts");

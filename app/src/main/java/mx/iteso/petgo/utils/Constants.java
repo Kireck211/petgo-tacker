@@ -2,12 +2,16 @@ package mx.iteso.petgo.utils;
 
 public class Constants {
     public static final String PARCELABLE_USER = "p_user";
+    public static final String PARCELABLE_TRIP = "p_trip";
+    public static final String TOKEN_USER = "token_user";
+    public static final String TOKEN_TRIP = "token_trip";
     public static final String FACEBOOK_PROVIDER = "facebook";
     public static final String GOOGLE_PROVIDER = "google";
     public static final String TYPE = "tacker";
     public static final String USER_PREFERENCES = "mx.iteso.petgo.USER_PREFERENCES";
     public static final String USER_TOKEN = "USER_TOKEN";
     public static final String USER_PROVIDER = "USER_PROVIDER";
+    public static final int PERMISSION_LOCATION_REQUEST_CODE = 12;
 
     public static final String ADDRESS_K = "address";
     public static final String ICON_K = "icon";

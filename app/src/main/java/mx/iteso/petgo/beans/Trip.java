@@ -13,8 +13,8 @@ public class Trip implements Parcelable {
     private Map<String, Alert> alerts;
     private double amount;
     private String date_hour;
-    private Map<String, Location> locations;
-    private Map<String, Location> address;
+    private Map<String, MyLocation> locations;
+    private Map<String, MyLocation> address;
     private String status;
     private int time;
     private User user;
@@ -26,11 +26,11 @@ public class Trip implements Parcelable {
         address = new HashMap<>();
     }
 
-    public Map<String, Location> getAddress() {
+    public Map<String, MyLocation> getAddress() {
         return address;
     }
 
-    public void setAddress(Map<String, Location> address) {
+    public void setAddress(Map<String, MyLocation> address) {
         this.address = address;
     }
 
@@ -74,11 +74,11 @@ public class Trip implements Parcelable {
         this.date_hour = date_hour;
     }
 
-    public Map<String, Location> getLocations() {
+    public Map<String, MyLocation> getLocations() {
         return locations;
     }
 
-    public void setLocations(Map<String, Location> locations) {
+    public void setLocations(Map<String, MyLocation> locations) {
         this.locations = locations;
     }
 
@@ -122,12 +122,12 @@ public class Trip implements Parcelable {
         dest.writeDouble(this.amount);
         dest.writeString(this.date_hour);
         dest.writeInt(this.locations.size());
-        for (Map.Entry<String, Location> entry : this.locations.entrySet()) {
+        for (Map.Entry<String, MyLocation> entry : this.locations.entrySet()) {
             dest.writeString(entry.getKey());
             dest.writeParcelable(entry.getValue(), flags);
         }
         dest.writeInt(this.address.size());
-        for (Map.Entry<String, Location> entry : this.address.entrySet()) {
+        for (Map.Entry<String, MyLocation> entry : this.address.entrySet()) {
             dest.writeString(entry.getKey());
             dest.writeParcelable(entry.getValue(), flags);
         }
@@ -149,17 +149,17 @@ public class Trip implements Parcelable {
         this.amount = in.readDouble();
         this.date_hour = in.readString();
         int locationsSize = in.readInt();
-        this.locations = new HashMap<String, Location>(locationsSize);
+        this.locations = new HashMap<String, MyLocation>(locationsSize);
         for (int i = 0; i < locationsSize; i++) {
             String key = in.readString();
-            Location value = in.readParcelable(Location.class.getClassLoader());
+            MyLocation value = in.readParcelable(MyLocation.class.getClassLoader());
             this.locations.put(key, value);
         }
         int addressSize = in.readInt();
-        this.address = new HashMap<String, Location>(addressSize);
+        this.address = new HashMap<String, MyLocation>(addressSize);
         for (int i = 0; i < addressSize; i++) {
             String key = in.readString();
-            Location value = in.readParcelable(Location.class.getClassLoader());
+            MyLocation value = in.readParcelable(MyLocation.class.getClassLoader());
             this.address.put(key, value);
         }
         this.status = in.readString();
